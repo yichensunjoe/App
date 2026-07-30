@@ -51,6 +51,9 @@ import ValidateCodeForm from './ValidateCodeForm';
 type SignInPageProps = {
     ref?: Ref<SignInPageRef>;
 
+    /** Whether this page should register its own Android hardware back handler. */
+    shouldHandleAndroidBackButton?: boolean;
+
     /** Whether to reset the browser tab title to the site title ("New Expensify") on focus. Only the public root
      *  sign-in screen should do this. The reusable SignInModal instance renders this same component over an
      *  anonymous-accessible report, where resetting would wrongly clear that report's tab title. */
@@ -58,7 +61,7 @@ type SignInPageProps = {
 };
 
 type SignInPageRef = {
-    navigateBack: () => void;
+    navigateBack: () => boolean;
 };
 
 type RenderOption = {
@@ -178,7 +181,7 @@ function ResetTabTitleOnFocus() {
     return null;
 }
 
-function SignInPage({ref, shouldResetTabTitle = true}: SignInPageProps) {
+function SignInPage({ref, shouldHandleAndroidBackButton = true, shouldResetTabTitle = true}: SignInPageProps) {
     const {translate, formatPhoneNumber} = useLocalize();
     const {shouldUseNarrowLayout} = useResponsiveLayout();
     const signInPageLayoutRef = useRef<SignInPageLayoutRef>(null);
@@ -333,7 +336,7 @@ function SignInPage({ref, shouldResetTabTitle = true}: SignInPageProps) {
     useImperativeHandle(ref, () => ({
         navigateBack,
     }));
-    useAndroidBackButtonHandler(navigateBack);
+    useAndroidBackButtonHandler(navigateBack, shouldHandleAndroidBackButton);
 
     return (
         <ColorSchemeWrapper>
@@ -379,7 +382,7 @@ function SignInPage({ref, shouldResetTabTitle = true}: SignInPageProps) {
     );
 }
 
-function SignInPageWrapper({ref, shouldResetTabTitle}: SignInPageProps) {
+function SignInPageWrapper({ref, shouldHandleAndroidBackButton, shouldResetTabTitle}: SignInPageProps) {
     const styles = useThemeStyles();
     const StyleUtils = useStyleUtils();
     const safeAreaInsets = useSafeAreaInsets();
@@ -396,6 +399,7 @@ function SignInPageWrapper({ref, shouldResetTabTitle}: SignInPageProps) {
         >
             <SignInPage
                 ref={ref}
+                shouldHandleAndroidBackButton={shouldHandleAndroidBackButton}
                 shouldResetTabTitle={shouldResetTabTitle}
             />
         </ScreenWrapper>
@@ -405,7 +409,7 @@ function SignInPageWrapper({ref, shouldResetTabTitle}: SignInPageProps) {
 // WithTheme is a HOC that provides theme-related contexts (e.g. to the SignInPageWrapper component since these contexts are required for variable declarations).
 // The sign-in page always uses the dark theme, but respects the user's contrast preference (nvp_preferredTheme) which is preserved on sign-out.
 function WithTheme(Component: React.ComponentType<SignInPageProps>) {
-    function ThemedComponent({ref, shouldResetTabTitle}: SignInPageProps) {
+    function ThemedComponent({ref, shouldHandleAndroidBackButton, shouldResetTabTitle}: SignInPageProps) {
         const [preferredTheme] = useOnyx(ONYXKEYS.PREFERRED_THEME);
         const [highContrastIntent] = useOnyx(ONYXKEYS.SIGN_IN_HIGH_CONTRAST_INTENT);
         const contrastThemes: string[] = [CONST.THEME.DARK_CONTRAST, CONST.THEME.LIGHT_CONTRAST, CONST.THEME.SYSTEM_CONTRAST];
@@ -418,6 +422,7 @@ function WithTheme(Component: React.ComponentType<SignInPageProps>) {
                     <HTMLEngineProvider>
                         <Component
                             ref={ref}
+                            shouldHandleAndroidBackButton={shouldHandleAndroidBackButton}
                             shouldResetTabTitle={shouldResetTabTitle}
                         />
                     </HTMLEngineProvider>

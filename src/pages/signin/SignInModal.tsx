@@ -36,10 +36,20 @@ function SignInModal() {
     // More info https://github.com/Expensify/App/pull/62799#issuecomment-2943136220.
     const SignInPageBase = useMemo(() => (isMobileSafari() ? SignInPageWrapped : SignInPage), []);
 
-    // The SignInPage (child component of SignInModal) uses useAndroidBackButtonHandler, which adds a hardwareBackPress listener that remains active in the SignInModal.
-    // Use of useAndroidBackButtonHandler with a returning true callback disables the default SignInModal hardware Android button behaviour, leaving only SignInPage handling (https://github.com/Expensify/App/issues/69391).
-    // The SignInPage Android back button behavior needs to remain because it is a fix for issue (https://github.com/Expensify/App/issues/67883) that occurs in the SignInModal.
+    const navigateBack = () => {
+        if (!signinPageRef.current) {
+            Navigation.goBack();
+            return;
+        }
+
+        signinPageRef.current.navigateBack();
+    };
+
+    // SignInModal owns the Android back handler while it is open. Delegating to SignInPage preserves its
+    // intermediate-step behavior (https://github.com/Expensify/App/issues/67883), while keeping only one active
+    // listener prevents a back press from navigating twice (https://github.com/Expensify/App/issues/69391).
     useAndroidBackButtonHandler(() => {
+        navigateBack();
         return true;
     });
 
@@ -79,20 +89,13 @@ function SignInModal() {
             shouldShowOfflineIndicator={false}
             testID="SignInModal"
         >
-            <HeaderWithBackButton
-                onBackButtonPress={() => {
-                    if (!signinPageRef.current) {
-                        Navigation.goBack();
-                        return;
-                    }
-                    signinPageRef.current?.navigateBack();
-                }}
-            />
+            <HeaderWithBackButton onBackButtonPress={navigateBack} />
             {/* Do not reset the browser tab title here: this modal can open over an anonymous-accessible report,
                 and resetting would wrongly clear that report's tab title. The title reset only applies to the
                 public root sign-in screen. */}
             <SignInPageBase
                 ref={signinPageRef}
+                shouldHandleAndroidBackButton={false}
                 shouldResetTabTitle={false}
             />
         </ScreenWrapper>
