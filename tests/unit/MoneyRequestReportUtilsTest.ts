@@ -171,6 +171,16 @@ describe('MoneyRequestReportUtils', () => {
             expect(isBillableEnabledOnPolicy(policy)).toBe(false);
         });
 
+        test('returns true when policy is paid group, defaultBillable is disabled, and Rules are enabled', () => {
+            const policy = createMock<Policy>({type: CONST.POLICY.TYPE.TEAM, disabledFields: {defaultBillable: true}, areRulesEnabled: true});
+            expect(isBillableEnabledOnPolicy(policy)).toBe(true);
+        });
+
+        test('returns false when policy is paid group, defaultBillable is disabled, and Rules are not enabled', () => {
+            const policy = createMock<Policy>({type: CONST.POLICY.TYPE.TEAM, disabledFields: {defaultBillable: true}, areRulesEnabled: false});
+            expect(isBillableEnabledOnPolicy(policy)).toBe(false);
+        });
+
         test('returns false when policy is non-paid group', () => {
             const policy = createMock<Policy>({type: CONST.POLICY.TYPE.PERSONAL, disabledFields: {defaultBillable: false}});
             expect(isBillableEnabledOnPolicy(policy)).toBe(false);

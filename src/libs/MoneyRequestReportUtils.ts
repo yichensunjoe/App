@@ -26,7 +26,7 @@ import {
 import {getReimbursable, getSupersededPendingCardTransactionIDs, isTransactionPendingDelete} from './TransactionUtils';
 
 function isBillableEnabledOnPolicy(policy: Policy | OnyxEntry<Policy> | undefined): boolean {
-    return !!policy && isPaidGroupPolicy(policy) && policy.disabledFields?.defaultBillable !== true;
+    return !!policy && isPaidGroupPolicy(policy) && (policy.disabledFields?.defaultBillable !== true || policy.areRulesEnabled === true);
 }
 
 function hasNonReimbursableTransactions(transactions: Transaction[]): boolean {
