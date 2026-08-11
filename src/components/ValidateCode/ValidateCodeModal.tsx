@@ -47,7 +47,7 @@ function ValidateCodeModal({code, accountID}: ValidateCodeModalProps) {
             shouldForceFullScreen={!isValidCode}
             shouldShowBackButton={shouldUseNarrowLayout}
             onLinkPress={() => {
-                Navigation.goBack();
+                Navigation.goBackToHome();
             }}
         >
             <View

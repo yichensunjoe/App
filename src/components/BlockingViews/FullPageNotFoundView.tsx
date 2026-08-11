@@ -78,7 +78,7 @@ function FullPageNotFoundView({
     subtitleKey = 'notFound.pageNotFound',
     linkTranslationKey = 'notFound.goBackHome',
     subtitleKeyBelowLink,
-    onBackButtonPress = () => Navigation.goBack(),
+    onBackButtonPress = () => Navigation.goBackToHome(),
     shouldShowLink = true,
     shouldShowBackButton = true,
     onLinkPress = () => Navigation.goBackToHome(),
